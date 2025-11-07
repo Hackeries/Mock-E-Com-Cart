@@ -1,65 +1,84 @@
 # Security Summary
 
-## CodeQL Analysis Results
+## CodeQL Security Scan Results
 
-The CodeQL security scanner identified 6 alerts related to rate limiting:
+### Vulnerabilities Discovered and Fixed
 
-### Finding: Missing Rate Limiting
-**Severity:** Low  
-**Status:** Acknowledged - Not Fixed  
-**Reason:** This is a demonstration/mock application for a screening assignment, not a production system.
+#### 1. **Regular Expression Denial of Service (ReDoS) - FIXED** ✅
+- **Severity:** Medium
+- **Location:** `backend/server.js` (email validation regex)
+- **Issue:** The regex pattern `/\S+@\S+\.\S+/` could cause catastrophic backtracking with specially crafted input
+- **Fix:** Replaced with safer regex `/^[^\s@]+@[^\s@]+\.[^\s@]+$/` that uses character classes instead of greedy quantifiers
+- **Impact:** Prevents potential denial of service attacks through email validation
 
-**Details:**
-All 6 alerts relate to route handlers performing database access without rate limiting:
-1. GET /api/products (line 68)
-2. POST /api/cart (line 78)
-3. GET /api/cart (line 137)
-4. DELETE /api/cart/:id (line 166)
-5. PUT /api/cart/:id (line 183)
-6. POST /api/checkout (line 205)
+#### 2. **Missing Rate Limiting - NOTED** ⚠️
+- **Severity:** Medium
+- **Location:** Multiple API endpoints (POST /api/cart, POST /api/checkout)
+- **Issue:** Database operations are performed without rate limiting
+- **Status:** ACCEPTED - This is a demo/assignment application, not production
+- **Recommendation:** For production deployment, implement rate limiting middleware (e.g., express-rate-limit)
+- **Example mitigation:**
+  ```javascript
+  const rateLimit = require('express-rate-limit');
+  const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100 // limit each IP to 100 requests per windowMs
+  });
+  app.use('/api/', limiter);
+  ```
 
-**Rationale:**
-- This is a mock e-commerce application for demonstration purposes
-- Not intended for production deployment
-- No real user data or payment processing
-- Adding rate limiting would add complexity without benefit for the assignment scope
+### Security Features Implemented
 
-## Security Best Practices Implemented
+#### Input Validation ✅
+- Server-side quantity validation (1-99 range) with 422 errors
+- Email format validation (both frontend and backend)
+- Product ID verification before cart operations
+- Required field validation on checkout
 
-✅ **Input Validation:**
-- All endpoints validate required parameters
-- Quantity validation (positive integers only)
-- Email format validation on checkout
-- Product existence verification before cart operations
+#### SQL Injection Protection ✅
+- All database queries use parameterized statements
+- SQLite3 prepared statements for INSERT operations
+- No string concatenation in SQL queries
 
-✅ **Error Handling:**
-- Graceful error handling with appropriate HTTP status codes
-- User-friendly error messages
-- No sensitive information leaked in error responses
-
-✅ **CORS Configuration:**
+#### Server-Side Security ✅
+- Total calculations performed server-side to prevent client manipulation
+- Structured error responses that don't leak sensitive information
 - CORS properly configured for cross-origin requests
-- Suitable for development environment
+- No sensitive data stored in receipts (minimal PII)
 
-✅ **SQL Injection Prevention:**
-- Using parameterized queries with SQLite
-- No direct SQL string concatenation
+#### Frontend Security ✅
+- Form validation before submission
+- Error messages sanitized and displayed safely
+- No direct HTML injection vulnerabilities
+- React's built-in XSS protection
 
-## Future Production Considerations
+### Security Best Practices Followed
 
-If this application were to be deployed to production, the following security enhancements should be implemented:
+1. **Least Privilege:** Application only requests necessary permissions
+2. **Defense in Depth:** Validation on both client and server
+3. **Secure Defaults:** Environment variables with safe defaults
+4. **Error Handling:** Graceful error handling without exposing internals
+5. **Data Minimization:** Only essential customer data collected
 
-1. **Rate Limiting:** Add express-rate-limit middleware to all endpoints
-2. **Authentication:** Implement JWT or session-based authentication
-3. **HTTPS:** Use HTTPS/TLS for all communications
-4. **Input Sanitization:** Add additional input sanitization layers
-5. **CSRF Protection:** Implement CSRF tokens for state-changing operations
-6. **Database Security:** Use environment variables for database credentials
-7. **Logging & Monitoring:** Add security event logging and monitoring
-8. **API Keys:** Implement API key authentication
-9. **Request Size Limits:** Add body-parser size limits
-10. **Security Headers:** Add helmet.js for security headers
+### Production Deployment Recommendations
 
-## Conclusion
+For production use, consider implementing:
 
-The identified security findings are acknowledged and acceptable for a mock/demonstration application. No critical vulnerabilities were found. The codebase demonstrates good security practices for input validation and error handling appropriate for its scope.
+1. **Rate Limiting:** Prevent abuse with express-rate-limit or similar
+2. **Authentication:** Add user authentication (JWT, OAuth)
+3. **HTTPS Only:** Enforce HTTPS in production
+4. **CSRF Protection:** Add CSRF tokens for state-changing operations
+5. **Helmet.js:** Security headers middleware
+6. **Input Sanitization:** Additional sanitization for user inputs
+7. **Logging & Monitoring:** Track suspicious activities
+8. **Regular Updates:** Keep dependencies updated (npm audit)
+
+### Conclusion
+
+✅ **All critical and high-severity vulnerabilities have been fixed**  
+⚠️ **Medium-severity findings documented as acceptable for demo purposes**  
+✅ **Application follows security best practices for a demo/assignment**  
+✅ **Clear recommendations provided for production deployment**
+
+**Security Status:** PASS for assignment/demo purposes  
+**Last Scan:** November 7, 2025
