@@ -98,12 +98,11 @@ function App() {
 
     // Optimistic update
     const previousCart = { ...cart };
-    setCart(prev => ({
-      items: prev.items.filter(item => item.id !== cartItemId),
-      total: prev.items
-        .filter(item => item.id !== cartItemId)
-        .reduce((sum, item) => sum + item.subtotal, 0)
-    }));
+    const filteredItems = cart.items.filter(item => item.id !== cartItemId);
+    setCart({
+      items: filteredItems,
+      total: filteredItems.reduce((sum, item) => sum + item.subtotal, 0)
+    });
 
     try {
       await axios.delete(`${API_URL}/cart/${cartItemId}`);
@@ -201,16 +200,6 @@ function App() {
           </button>
         </div>
       </header>
-
-      {/* Screen reader announcements */}
-      <div 
-        role="status" 
-        aria-live="polite" 
-        aria-atomic="true" 
-        className="sr-only"
-      >
-        {/* Announcements handled by toast notifications */}
-      </div>
 
       {error && (
         <div className="error-message" role="alert">

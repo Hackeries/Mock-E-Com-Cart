@@ -11,6 +11,7 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 const USE_FAKE_API = process.env.USE_FAKE_API === 'true';
 const MOCK_USER_ID = parseInt(process.env.MOCK_USER_ID || '1', 10);
+const FAKE_STORE_API_TIMEOUT = 5000; // 5 seconds timeout for Fake Store API
 
 // Middleware
 app.use(cors());
@@ -133,7 +134,7 @@ function seedProducts() {
 // Fetch and cache products from Fake Store API
 async function fetchFromFakeStoreAPI() {
   try {
-    const response = await axios.get('https://fakestoreapi.com/products', { timeout: 5000 });
+    const response = await axios.get('https://fakestoreapi.com/products', { timeout: FAKE_STORE_API_TIMEOUT });
     const fakeProducts = response.data.slice(0, 10); // Take first 10 products
     
     db.get("SELECT COUNT(*) as count FROM products", [], (err, row) => {

@@ -78,8 +78,8 @@ function CheckoutModal({ cart, onClose, onSubmit }) {
             <div className="error-summary" role="alert" aria-live="assertive">
               <p>Please correct the following errors:</p>
               <ul>
-                {Object.values(errors).map((error, index) => (
-                  <li key={index}>{error}</li>
+                {Object.entries(errors).map(([field, error]) => (
+                  <li key={field}>{error}</li>
                 ))}
               </ul>
             </div>
