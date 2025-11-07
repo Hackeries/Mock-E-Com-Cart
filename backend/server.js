@@ -402,8 +402,8 @@ app.post('/api/checkout', (req, res) => {
     });
   }
 
-  // Email validation
-  const emailRegex = /\S+@\S+\.\S+/;
+  // Email validation - using simpler regex to avoid ReDoS
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(customerEmail)) {
     return res.status(422).json({ 
       error: 'Validation failed',

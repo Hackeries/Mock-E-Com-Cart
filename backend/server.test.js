@@ -53,9 +53,11 @@ describe('API Validation Tests', () => {
 
   describe('POST /api/checkout - Email Validation', () => {
     test('should validate email format', () => {
-      const emailRegex = /\S+@\S+\.\S+/;
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       expect(emailRegex.test('valid@email.com')).toBe(true);
       expect(emailRegex.test('invalid-email')).toBe(false);
+      expect(emailRegex.test('user@')).toBe(false);
+      expect(emailRegex.test('@domain.com')).toBe(false);
     });
   });
 

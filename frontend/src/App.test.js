@@ -27,11 +27,12 @@ describe('Cart functionality', () => {
   });
 
   test('email validation uses correct regex', () => {
-    const emailRegex = /\S+@\S+\.\S+/;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     expect(emailRegex.test('valid@email.com')).toBe(true);
     expect(emailRegex.test('user@domain.co.uk')).toBe(true);
     expect(emailRegex.test('invalid-email')).toBe(false);
     expect(emailRegex.test('@domain.com')).toBe(false);
+    expect(emailRegex.test('user@')).toBe(false);
   });
 });
 
